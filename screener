@@ -1,0 +1,16 @@
+#!/bin/sh
+
+: "
+NAME
+	Screener
+DESCRIPTION
+	Initialize displays and wacom devices to sane (for me and my setup) defaults.
+"
+
+if xrandr -q | grep 'DP2 connected ' >/dev/null; then
+	xrandr --output LVDS1 --mode 1366x768 --pos 0x282 --rotate normal --output DP2 --mode 1920x1080 --pos 1366x0
+	xsetwacom set 16 MapToOutput LVDS1
+	xsetwacom set 17 MapToOutput LVDS1
+	xsetwacom set 23 MapToOutput LVDS1
+	setbg
+fi

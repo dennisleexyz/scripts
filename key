@@ -1,0 +1,18 @@
+#!/bin/sh
+
+: "
+NAME
+	key
+NOTES
+	https://wiki.archlinux.org/index.php/Keyboard_input#Identifying_keycodes_in_Xorg
+"
+
+if ! command -v xev; then
+	echo 'xev not found'
+	command -v pacman >/dev/null \
+		&& sudo pacman -S xorg-xev \
+		|| echo 'pacman not found'; exit
+fi
+
+xev | awk -F'[ )]+' \
+	'/^KeyPress/ { a[NR+2] } NR in a { printf "%-3s %s\n", $5, $8 }'

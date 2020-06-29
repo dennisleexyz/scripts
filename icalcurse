@@ -1,0 +1,16 @@
+#!/bin/sh
+
+: "
+NAME
+	icalcurse - iCalendar calcurse Importer
+"
+
+# shellcheck source=/dev/null
+. "$HOME/.profile"
+
+url="$1"
+ics=$(echo "$url" | grep -o "[^/]*\.ics")
+cd /tmp || notify-send -u critical "$(basename "$0")" "cd: no such file or directory: /tmp"; exit
+wget "$url"
+calcurse -i "$ics"
+rm "$ics"

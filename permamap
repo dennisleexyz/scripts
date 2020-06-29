@@ -1,0 +1,16 @@
+#!/bin/sh
+
+: "
+NAME
+	Permanent Mapping
+DESCRIPTION
+	Permanently maps the keyboard's Caps Lock key to Super (Mod4) in the X11
+	Display Server. Requires root privilege.
+"
+
+s='Option "XkbOptions" "' # string
+f='/etc/X11/xorg.conf.d/00-keyboard.conf' # file
+
+grep "$s" "$f" \
+&& sed -Ei 's/Option "XkbOptions" "(.*)"/Option "XkbOptions" "caps:super,\1"/' $f \
+|| exit 1

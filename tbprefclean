@@ -1,0 +1,21 @@
+#!/bin/sh
+
+: "
+NAME
+	tbprefclean - Thunderbird prefs.js Cleaner
+"
+
+echo "$1" | grep 'prefs.js$' >/dev/null || exit
+
+tmp=$(mktemp)
+
+grep 'user_pref("mail\.' "$1" \
+| grep -v '[^t]name[^"]' \
+| grep -v '_folder' \
+| grep -v '\.directory", "' \
+| grep -v '\.description", "' \
+| grep -v '\.[[:alpha:]]*[[:digit:]]", "' \
+| grep '[[:alpha:]][[:digit:]]' \
+> "$tmp" && mv "$tmp" "$1"
+
+# grep -rh 'user_pref("mail.server.server[[:digit:]]\+\.name", ".*");' >> prefs.js

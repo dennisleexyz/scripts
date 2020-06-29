@@ -1,0 +1,20 @@
+#!/bin/sh
+
+: "
+NAME
+	Thunderbird and Firefox user.js Formatter
+"
+
+echo "$1" | grep 'user.js$' >/dev/null || exit
+
+# shellcheck disable=SC2094
+grep -v 'user_pref("' "$1" | sed '
+s/^/user_pref("/;
+s/;/", /;
+s/$/);/;
+' >> "$1" \
+&& sed -i '
+/^[^u/]/d;
+s/", \([^"tf[:digit:]].*\));/", "\1");/;
+' "$1" \
+&& sort "$1" -o "$1"

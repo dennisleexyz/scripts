@@ -1,0 +1,11 @@
+#!/bin/sh
+
+: "
+NAME
+	Unstage New
+DESCRIPTION
+	Unstages files in the current git(1) repository that have been
+	cached/staged for the first time.
+"
+
+git restore --staged $(git status -s | grep '^A  ' | awk '{print $2}')

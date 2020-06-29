@@ -1,0 +1,12 @@
+#!/bin/bash
+
+: "
+NAME
+	Percent Encoder
+DESCRIPTION
+	Converts a string to percent encoding, as used in HTML/the World Wide Web.
+"
+
+for (( i=0; i<${#1}; i++ )); do
+ 	 printf %%%X \'"${1:$i:1}"
+done

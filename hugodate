@@ -1,0 +1,20 @@
+#!/bin/sh
+
+: "
+NAME
+	hugodate - Hugo Date Formatter
+"
+
+date="$(date -Is)"
+
+if grep 'date: ' "$1"; then
+	sed -i "s/date: .*/date: $date/" "$1"
+else
+	sed -i "s/slug: /date: $date\nslug: /" "$1"
+fi
+
+file=$(readlink -f "$1")
+dir=${file%/*}
+name="$(echo "$file" | grep -oE '/[^/]*$' | sed 's,/,,')"
+
+mv "$1" "$dir/$(date -I)-$name"

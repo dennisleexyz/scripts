@@ -1,0 +1,25 @@
+#!/bin/sh
+
+: "
+NAME
+	tbpfclean - Thunderbird Profile Cleaner
+DEPENDENCIES
+	./tbffuf
+"
+
+export paths_to_preserve='
+extensions
+ImapMail
+extensions.ini
+key4.db
+logins.json
+prefs.js
+user.js
+'
+
+find "${1:-.}" -mindepth 1 -maxdepth 1 -exec sh -c '
+	f=$(echo "$1" | sed "s,.*/,,")
+	echo "$paths_to_preserve" | grep "^$f$" || echo "rm -r $1"
+' -- {} \;
+
+[ -f "${1:-.}/prefs.js" ] && tbffuf "${1:-.}/prefs.js"
