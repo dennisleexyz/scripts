@@ -24,10 +24,10 @@ git clone https://github.com/instantos/instantARCH.git
 cd instantARCH || exit
 git checkout f07cf46c5a1047054caae02d76077088b73cfb78
 find ./* -type f -exec sed -i '
-	s/ARCHlinux\.org/parabola.nu/g;
+	s/archlinux\.org/parabola.nu/g;
 	s/linux/linux-libre/g;
 	/^\[ -e instantARCH \] && rm -rf instantARCH$/d;
 	s, xorg, extra/xorg,g;
 	/xorg-drivers/d;
 ' {} +;
-/root/instantARCH/ARCHinstall.sh
+/root/instantARCH/archinstall.sh
