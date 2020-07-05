@@ -17,17 +17,17 @@ pacman-key --populate parabola
 # Next 2 lines are technically redundant on fresh boot of Parabola ISO, but
 # included for safety.
 cd /root || exit
-[ -d instantARCH ] && rm -rf instantARCH
+[ -d instantarch ] && rm -rf instantarch
 
 pacman -Sy --noconfirm git
-git clone --depth=1 https://github.com/instantos/instantARCH.git
-cd instantARCH || exit
+git clone https://github.com/instantos/instantarch.git
+cd instantarch || exit
+git checkout f07cf46c5a1047054caae02d76077088b73cfb78
 find ./* -type f -exec sed -i '
 	s/archlinux\.org/parabola.nu/g;
-	s/[[:space:]]*linux-firmware//g;
 	s/linux/linux-libre/g;
-	/^\[ -e instantARCH \] && rm -rf instantARCH$/d;
+	/^\[ -e instantarch \] && rm -rf instantarch$/d;
 	s, xorg, extra/xorg,g;
 	/xorg-drivers/d;
 ' {} +;
-/root/instantARCH/archinstall.sh
+/root/instantarch/archinstall.sh
