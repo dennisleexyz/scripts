@@ -1,0 +1,29 @@
+#!/bin/sh
+
+: "
+NAME
+	instantparabola - instantOS install wrapper for use with Parabola repos
+
+DESCRIPTION
+	Installs instantOS, making only the necessary changes to its installer for
+	it to work from Parabola's repos and live CLI ISO.
+"
+
+# This worked for me to fix "package installation failed". As of writing,
+# latest Parabola ISO comes with old keys that must be refreshed.
+pacman-key --refresh-keys
+pacman-key --populate parabola
+
+# Next 2 lines are redundant on fresh boot of Parabola ISO.
+# cd /root
+# [ -e instantARCH ] && rm -rf instantARCH
+
+pacman -Sy --noconfirm git
+git clone --depth=1 https://github.com/instantos/instantARCH.git
+cd instantARCH
+find * -type f -exec sed -i '
+	s/archlinux\.org/parabola.nu/g;
+	s/[[:space:]]linux-firmware//g;
+	s/linux/linux-libre/g;
+' {} +;
+bash <(curl -Ls git.io/instantarch | grep -v '^\[ -e instantARCH \] && rm -rf instantARCH$')
