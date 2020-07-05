@@ -14,16 +14,18 @@ DESCRIPTION
 pacman-key --refresh-keys
 pacman-key --populate parabola
 
-# Next 2 lines are redundant on fresh boot of Parabola ISO.
-# cd /root
-# [ -e instantARCH ] && rm -rf instantARCH
+# Next 2 lines are technically redundant on fresh boot of Parabola ISO, but
+# included for safety.
+cd /root || exit
+[ -d instantARCH ] && rm -rf instantARCH
 
 pacman -Sy --noconfirm git
 git clone --depth=1 https://github.com/instantos/instantARCH.git
-cd instantARCH
-find * -type f -exec sed -i '
+cd instantARCH || exit
+find ./* -type f -exec sed -i '
 	s/archlinux\.org/parabola.nu/g;
 	s/[[:space:]]linux-firmware//g;
 	s/linux/linux-libre/g;
+	/^\[ -e instantARCH \] && rm -rf instantARCH$/d;
 ' {} +;
-bash <(curl -Ls git.io/instantarch | grep -v '^\[ -e instantARCH \] && rm -rf instantARCH$')
+/root/instantARCH/archinstall.sh
