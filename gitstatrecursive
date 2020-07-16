@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Print git status and git diff for each git repo in the current directory.
+
+dx=$(find "${1:-.}" -maxdepth 1 -mindepth 1)
+
+for d in $dx; do
+	cd "$d"
+
+	echo '=================================================='
+	echo "$d"
+	git status -vv --column 2>/dev/null
+
+	cd ${1:-..}
+done

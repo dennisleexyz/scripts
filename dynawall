@@ -1,0 +1,31 @@
+#!/bin/sh
+
+: "
+NAME
+	dynawall - Dynamic Wallpaper
+
+DESCRIPTION
+	Change wallpaper at the top of every hour. From 00.jpg at midnight to
+	23.jpg at the hour before midnight.
+
+EXAMPLE
+	#crontab -e
+	0 * * * * . $HOME/.profile; dynawall $HOME/.local/share/wg/catalina
+
+BUGS
+	Only works properly with a directory of .jpg images numbered 00 to 23
+	(although the directory may contain other files)
+"
+
+export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR:-/run/user/$(id -ur)}/bus}
+export DISPLAY=${DISPLAY:-:0}
+export XAUTHORITY=${XAUTHORITY:-"$HOME/.Xauthority"}
+
+f="$1/$(date +%H).jpg"
+
+setbg "$f" ||
+	notify-send \
+	-u critical \
+	-i "$f" \
+	"$(basename "$0")" \
+	"$f: No such file or directory" \

@@ -1,0 +1,119 @@
+#!/bin/sh
+
+: "
+NAME
+	debsetup
+
+DESCRIPTION
+	My Devuan 3 Beowulf server setup.
+
+NOTES
+	This script is to be run on an installed Devuan 3 Beowulf system with root
+	permissions. Otherwise it (probably) won't work! It should work on Debian
+	and other versions of Devuan, though, with some minor adjustments.
+
+SEE ALSO
+	https://askubuntu.com/a/399078
+	https://dennislee.xyz/2020/debian-eliminate-dependency-bloat/
+
+	https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/
+
+BUGS
+	User-level configuration is currently hardcoded to only be set for the
+	first home directory found in /home.
+"
+
+# Put contrib in front of non-free; comment out non-free.
+sed -Ei '
+	s/(non-free) (contrib)/\2 \1/;
+	s/ (non-free)/#\1/;
+' /etc/apt/sources.list
+
+# Add backports.
+echo '
+deb http://deb.devuan.org/merged beowulf-backports main contrib' \
+	>> /etc/apt/sources.list
+
+# Use backports for zfs-related packages.
+echo "\
+Package: libnvpair1linux libuutil1linux libzfs2linux libzpool2linux spl-dkms zfs-dkms zfs-test zfsutils-linux zfsutils-linux-dev zfs-zed
+Pin: release n=beowulf-backports
+Pin-Priority: 990" \
+	>> /etc/apt/preferences.d/90_zfs
+
+# Treat recommended and suggested packages as optional.
+echo 'APT::Install-Recommends "false";
+APT::AutoRemove::RecommendsImportant "false";
+APT::AutoRemove::SuggestsImportant "false";' \
+	>> /etc/apt/apt.conf.d/99_norecommends
+
+# Clean up already installed recommends.
+apt autoremove
+
+# If the root partition is btrfs, install btrfs userpace tools.
+lsblk -o FSTYPE,MOUNTPOINT | grep -E '^btrfs +/$' && apt install btrfs-tools # btrfsmaintenance
+
+# Install zfs-related packages.
+apt update
+apt install dpkg-dev linux-headers-"$(uname -r)" linux-image-amd64
+apt install zfs-dkms zfsutils-linux
+apt install zfs-auto-snapshot # Automatically installs cron jobs, so just werks.
+# apt install zfsnap # Another similar utility.
+
+# Install other packages (in approximate descending order of importance).
+apt install -y \
+	openssh-server \
+	mosh \
+	dvtm \
+	dtach \
+	neovim \
+	shellcheck \
+	# tmux \
+	# wget \
+	# curl \
+	# rsync \
+	# tree \
+	# man-db \
+	# zsh \
+	# zsh-autosuggestions \
+	# zsh-syntax-highlighting \
+	# fizsh \
+	# zsh-theme-powerlevel9k \
+
+apt install -y vifm &&
+	apt install -y python3-pip python3-dev python3-setuptools python3-wheel &&
+	pip3 install ueberzug
+apt install -y apt-file && apt-file update
+
+# Hide GRUB by default (hold shift while booting to show it). When I tested
+# this change, it didn't seem to have an effect, though. Oh well, doesn't hurt.
+sed -i 's/GRUB_TIMEOUT=[[:digit:]][[:space:]]*$/GRUB_HIDDEN_TIMEOUT=0 #&/
+' /etc/default/grub && update-grub
+
+HOME=$(find /home -mindepth 1 -maxdepth 1 | sed 1q)
+
+# I don't want the fish(1) welcome message every time. So I just set the
+# greeting to an empty function.
+apt install -y fish &&
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions" &&
+echo 'function fish_greeting
+end' > "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fish_greeting.fish"
+
+# Some basic configuration. Disable less(1) history file, use dvtm(1) on login.
+# shellcheck disable=SC2016
+echo '
+# export LESSHISTFILE=-
+export SHELL=/usr/bin/fish
+command -v dvtm >/dev/null &&
+	[ -n "$PS1" ] &&
+	# [ "$TERM" != "dvtm-256color" ] &&
+	# [ -z "$DVTM" ] &&
+	exec dvtm' \
+	>> "$HOME/.profile"
+
+# Use POSIX sh(1) (actually dash(1), in this case) as login shell.
+chsh -s /bin/sh "$(basename "$HOME")"
+
+# Remove bash(1)-related files in ~/. They can be copied back over from
+# /etc/skel, if necessary.
+rm .bash* "$HOME"

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Note: scp always follows links (hard links and symlinks/soft links).
+# See https://stackoverflow.com/q/11030394 for other options.
+scp "$@" && rm -f "$@"

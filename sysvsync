@@ -1,0 +1,40 @@
+#!/bin/sh
+
+: "
+DESCRIPTION
+	Syncthing setup for Devuan or other apt-based distro with SysVInit.
+
+NOTES
+	Run this as regular user, not root.
+	Syncthing will start even without you logging in.
+
+DEPENDENCIES
+	apt(8)
+	sudo(8)
+	wget(1)
+	syncthing(1)
+"
+
+set -e
+
+command -v syncthing >/dev/null || sudo apt install syncthing
+command -v wget >/dev/null || sudo apt install wget
+
+url=https://gist.githubusercontent.com/typomedia/3fe16c0e8214ce60b0b2/raw/23595ba29ce853da85e26e6b376ad52fb9f0b861/init.syncthing.sh
+file=$(basename $url)
+
+wget --no-check-certificate $url
+sed -Ei "s/^(USER=)syncthing\$/\1$(id -un)/" "$file"
+chmod 0755 "$file" # https://serverfault.com/q/49239
+sudo chown root:root "$file"
+sudo mv "$file" /etc/init.d
+sudo update-rc.d init.syncthing.sh defaults
+
+# https://docs.syncthing.net/users/faq.html#how-do-i-access-the-web-gui-from-another-computer
+sed -i 's/127.0.0.1/0.0.0.0/' "${XDG_CONFIG_HOME:-$HOME/.config}/syncthing/config.xml"
+
+# https://docs.syncthing.net/users/faq.html#inotify-limits
+echo "fs.inotify.max_user_watches=204800" | sudo tee -a /etc/sysctl.conf
+sudo sh -c 'echo 204800 > /proc/sys/fs/inotify/max_user_watches'
+
+sudo service init.syncthing.sh start

@@ -7,6 +7,10 @@ NAME
 DESCRIPTION
 	Installs instantOS, making only the necessary changes to its installer for
 	it to work from Parabola's repos and live CLI ISO.
+
+NOTES
+	Untested. Lost interest in using this setup, due to limitations and
+	brokenness of Parabola.
 "
 
 # This worked for me to fix "package installation failed". As of writing,
@@ -23,11 +27,25 @@ pacman -Sy --noconfirm git
 git clone https://github.com/instantos/instantARCH.git
 cd instantARCH || exit
 git checkout f07cf46c5a1047054caae02d76077088b73cfb78
-find ./* -type f -exec sed -i '
-	s/archlinux\.org/parabola.nu/g;
-	s/linux/linux-libre/g;
+
+sed -i 's|.*pacman -S instant.*|echo "[libre-testing]" >> /etc/pacman.conf\
+echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf\
+pacman -Sy --noconfirm libre-testing/conky\
+&|' instantos/install.sh
+
+find ./* -type f -exec sed -in '
 	/^\[ -e instantARCH \] && rm -rf instantARCH$/d;
+
+	s/archlinux\.org/parabola.nu/g;
+
+	s/linux/linux-libre/g;
 	s, xorg, extra/xorg,g;
+	s,base-devel,core/base-devel nonsystemd/base-devel,g;
+
 	/xorg-drivers/d;
+	/pamac-aur/d;
+	/firefox/d;
+	/steam/d;
 ' {} +;
+
 /root/instantARCH/archinstall.sh

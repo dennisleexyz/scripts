@@ -1,0 +1,22 @@
+#!/bin/sh
+# shellcheck disable=2034
+
+a=$(find "$1" | sed -E "s|^$1/?||")
+b=$(find "$2" | sed -E "s|^$2/?||")
+
+# find(1) separates paths only by new line characters, so that's the only
+# internal field separator we want here to separate items in the for loop.
+IFS='
+'
+
+for path in $b; do
+	# If the path (from $b) is not found in $a
+	echo "$a" | grep "$path" >/dev/null || {
+		# Print the file path
+		#echo "$path"
+
+		# Recreate the hierarchy of $2, except only with the files that weren't
+		# found in $1, as a subdirectory of $1. `--parents' is a GNU extension.
+		cp -rv --parents "$2/$path" "$1"
+	}
+done

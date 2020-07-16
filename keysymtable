@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Open the X11 keysym definition file in the default PAGER (or less, if it is
+# not set).
+${PAGER:-less} /usr/include/X11/keysymdef.h

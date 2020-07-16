@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Given a remote host name, ssh into the remote server and configure it to
+# disallow password login (so only key-based login is allowed).
+
+hostname=$1
+
+ssh-copy-id -i ~/.ssh/id_rsa.pub "$hostname"
+
+ssh "$1" -t 'sudo sed -Ei "
+	s/^#?(PasswordAuthentication).*/\1 no/;
+	s/^#?(UsePAM).*/\1 no/;
+	s/^#?(ChallengeResponseAuthentication).*/\1 no/;
+" /etc/ssh/sshd_config'

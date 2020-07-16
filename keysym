@@ -2,7 +2,7 @@
 
 : "
 NAME
-	key
+	keysym
 NOTES
 	https://wiki.archlinux.org/index.php/Keyboard_input#Identifying_keycodes_in_Xorg
 "

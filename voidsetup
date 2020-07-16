@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# My Void Linux desktop setup, to be run on an installed Void Linux.
+
+sudo xbps-install -Suy
+sudo xbps-install -Suy
+
+sudo xbps-install -y \
+	xorg-minimal \
+	xinit \
+	dwm \
+	dmenu \
+	st \
+	&& echo 'exec dwm' >> "$HOME/.xinitrc"
+
+sudo xbps-install -Sy void-repo-nonfree && {
+	sudo xbps-install -S
+
+	# https://docs.voidlinux.org/config/graphical-session/graphics-drivers/nvidia.html#nvidia-proprietary-driver
+	# https://docs.voidlinux.org/config/graphical-session/graphics-drivers/nvidia.html#32-bit-program-support-glibc-only
+	sudo xbps-install \
+		nvidia390 \
+		nvidia390-libs-32-bit \
+
+	# https://wiki.voidlinux.org/Steam
+	sudo xbps-install steam &&
+	sudo xbps-install -Sy void-repo-multilib{,-nonfree} &&
+	sudo xbps-install -S &&
+	sudo xbps-install -Sy libgcc-32bit libstdc++-32bit libdrm-32bit libglvnd-32bit
+}
+
+# https://docs.voidlinux.org/config/firmware.html
+#sudo xbps-install linux-firmware-amd
+
+sudo makewhatis /usr/share/man
+
+# https://www.maketecheasier.com/disable-root-account-linux/
+sudo passwd -d root

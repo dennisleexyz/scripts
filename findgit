@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Find git repos within a given directory (defaults to the current working
+# directory.)
+
+# find(1) puts every result on a separate line, so the only separator we want
+# is the new line character.
+IFS='
+'
+
+# The heuristic is that a folder is a git repo if it contains a `.git/` folder.
+# shellcheck disable=2046
+dirname $(find "${1:-.}" -name '.git')
