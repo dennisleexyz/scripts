@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Copy only the essential parts of an Interlink profile from 1 folder to
+# another. The source should be `./`. Requires GNU cp(1) for its `--parents`
+# option.
+
+# Files/folders to be copied from $1 to $2.
+paths="
+	extensions
+	extensions.ini
+	key4.db
+	logins.json
+	ImapMail
+	prefs.js
+	user.js
+"
+
+# Exit returning error if $1 or $2 not specified. Unused in favor of cp(1)'s
+# error handling.
+# [ -z "$1" ] || [ -z "$2" ] && exit 1
+
+for path in $paths; do
+	# `--parents` requires GNU cp(1). Exit on the first failed cp(1).
+	cp -ariv --parents "$1/$path" "$2" || break
+done &&
+	# Run my `prefsjsclean` script on the new prefs.js if the loop succeeded.
+	[ -e "$2/prefs.js" ] && prefsjsclean "$2/prefs.js"

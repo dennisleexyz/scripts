@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Given a folder, remove empty subfiles and subfolders. If removing something
+# creates a new empty folder (so if a folder only has empty contents), remove
+# that too and check again until nothing's empty.
+
+while ! find "${1:-.}" -empty -exec rm -r {} \;
+do
+	true
+done

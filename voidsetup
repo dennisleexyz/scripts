@@ -11,6 +11,8 @@ sudo xbps-install -y \
 	dwm \
 	dmenu \
 	st \
+	alsa-utils \
+	virtualbox-ose \
 	&& echo 'exec dwm' >> "$HOME/.xinitrc"
 
 sudo xbps-install -Sy void-repo-nonfree && {
