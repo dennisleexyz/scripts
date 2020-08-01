@@ -1,9 +1,37 @@
 #!/bin/sh
 
+# Run this while chrooted into a fresh Arch install.
+
 echo '
+UseSyslog
+Color
+TotalDownload
+VerbosePkgLists
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+
+[chaotic-aur]
+Server = http://lonewolf-builder.duckdns.org/$repo/x86_64
+
 [instant]
+SigLevel = Optional TrustAll
 Server = https://instantos.surge.sh' >> /etc/pacman.conf
-pacman -Syu yay
+
+# https://lonewolf.pedrohlc.com/chaotic-aur/
+sudo pacman-key --keyserver keys.mozilla.org -r 3056513887B78AEB #8A9E14A07010F7E3
+sudo pacman-key --lsign-key 3056513887B78AEB
+# sudo pacman-key --lsign-key 8A9E14A07010F7E3
+
+pacman -Syu yadm
+
+pacman -S base-devel yay && {
+	gpasswd -a dennis wheel
+	# shellcheck disable=2016
+	printf '\n%%wheel ALL=(ALL) ALL' >> /etc/sudoers
+}
+
+chsh -s /bin/sh dennis
 
 # https://www.thinkwiki.org/wiki/Integrated_Fingerprint_Reader#Models_featuring_this_Technology
 if lsusb | grep -Ey 'upek touch[[:alpha:]]{2,3}ip'; then
@@ -26,84 +54,48 @@ case "$4" in
 		;;
 esac' > /etc/acpi/actions/tabletmode.sh &&
 		echo 'event=video/tabletmode
-action=/etc/acpi/actions/tabletmode.sh'
+action=/etc/acpi/actions/tabletmode.sh'http://forums.steampowered.com/forums/showthread.php?t=840657
 	}
 
+	pacman -S gdm && systemctl enable -f gdm
+	# pacman -S sddm && systemctl enable -f sddm
+	yay -S xinit-xsession
+
 	# https://wiki.archlinux.org/index.php/Fprint
-	pacman -S gdm && systemctl enable -f gdm && {
-	# pacman -S sddm && systemctl enable -f sddm && {
-		echo 'polkit.addRule(function (action, subject) {
+	pacman -S fprintd
+	# https://wiki.archlinux.org/index.php/Fprint#Restrict_enrolling
+	echo 'polkit.addRule(function (action, subject) {
 	if (action.id == "net.reactivated.fprint.device.enroll") {
 		return subject.user == "root" ? polkit.Result.YES : polkit.result.NO
 	}
 })' > /usr/share/polkit-1/rules.d/50-net.reactivated.fprint.device.enroll.rules
 
-		# https://wiki.archlinux.org/index.php/Display_manager#Run_~/.xinitrc_as_a_session
-		yay -S xinit-xsession
-	}
-
 	# yay -S thinkpad-scripts && {
 	#	udevadm trigger --action=change
 	#	systemctl restart acpid
 	# }
+	
+	pacman -S linux-hardened
+	# pacman -S linux-lts
+	pacman -S linux-firmware
 
-	# pacman -Sy \
-	# 	instantwm \
-	# 	instantassist \
-		# instantutils \
-		# ttf-nerd-fonts-symbols \
-		# instantdepend \
-		# cantarell-fonts \
-		# instantwm \
-		# --assume-installed instantshell \
-		# --assume-installed instantdotfiles \
+	pacman -S xf86-input-wacom xournalpp
 else
-	pacman -S sx
+	pacman -S \
+		sx \
+		linux-zen \
+		linux-zen-headers \
+		lib32-nvidia-390xx-utils \
+
+	yay -S \
+		nvidia-390xx-dkms \
+
+	sed -Ei '
+		s/.*(GRUB_GFXPAYLOAD_LINUX=).*/\11920x1080,keep/;
+	' /etc/default/grub && grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-# https://wiki.archlinux.org/index.php/Polkit#Authentication_agents
-pacman -S \
-	man \
-	neovim \
-	lxqt-policykit \
-
-# pacman -S connman && systemctl enable connman
-# pacman -S netctl && systemctl enable netctl
-
 echo '
-GRUB_CMDLINE_LINUX_DEFAULT="quiet cryptdevice=UUID=72fee427-1174-4172-871e-c2ced1daefc2:luks-72fee427-1174-4172-871e-c2ced1daefc2 root=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 resume=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 udev.log_priority=3"
-GRUB_ENABLE_CRYPTODISK=y
+#GRUB_CMDLINE_LINUX_DEFAULT="quiet cryptdevice=UUID=72fee427-1174-4172-871e-c2ced1daefc2:luks-72fee427-1174-4172-871e-c2ced1daefc2 root=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 resume=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 udev.log_priority=3"
+#GRUB_ENABLE_CRYPTODISK=y
 GRUB_TIMEOUT_STYLE=hidden' >> /etc/default/grub
-
-echo '
-UseSyslog
-Color
-TotalDownload
-VerbosePkgLists
-
-[multilib]
-Include = /etc/pacman.d/mirrorlist
-
-# [pcr]
-# SigLevel = PackageRequired
-# Server = https://redirector.parabola.nu/$repo/os/$arch
-
-# [kernels]
-# SigLevel = PackageRequired
-# Server = https://redirector.parabola.nu/$repo/os/$arch
-
-# [nonprism]
-# SigLevel = PackageRequired
-# Server = https://redirector.parabola.nu/$repo/os/$arch
-
-# [libre]
-# SigLevel = PackageRequired
-# Server = https://redirector.parabola.nu/$repo/os/$arch
-
-# [nonsystemd]
-# SigLevel = PackageRequired
-# Server = https://redirector.parabola.nu/$repo/os/$arch
-
-[instant]
-SigLevel = Optional TrustAll
-Server = https://instantos.surge.sh' >> /etc/pacman.conf

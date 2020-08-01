@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# https://github.com/morhetz/gruvbox-contrib/tree/master/xresources
+# https://www.reddit.com/r/suckless/comments/hfh61b/st_live_reload/
+gtk=Adwaita
+gtk_dark="$gtk"-dark
+xrdb_light=${XDG_CONFIG_HOME:-$HOME/.config}/xrdb/Xresources-gruvbox-light
+xrdb_dark=${XDG_CONFIG_HOME:-$HOME/.config}/xrdb/Xresources-gruvbox-dark
+TERMINAL=${TERMINAL:-xst}
+
+# https://ip-api.com/docs
+lat=$(curl -s ip-api.com/line/?fields=lat)N
+lon=$(curl -s ip-api.com/line/?fields=lon)E
+
+# https://wiki.archlinux.org/index.php/Dark_mode_switching#GTK
+pidof gsd-xsettings &&
+	alias set='gsettings set org.gnome.desktop.interface gtk-theme'
+pidof xfsettingsd &&
+	alias set='xfconf-query -c xsettings -p /Net/ThemeName -s'
+
+# https://unix.stackexchange.com/questions/2931/sunrise-and-other-astronomical-data-from-the-command-line
+# https://github.com/risacher/sunwait
+# https://aur.archlinux.org/packages/sunwait/
+while true; do
+	if sunwait poll "$lat" "$lon" | grep DAY; then
+		set "$gtk"
+		xrdb "$xrdb_light"
+		sunwait wait set "$lat" "$lon"
+	else
+		set "$gtk_dark"
+		xrdb "$xrdb_dark"
+		sunwait wait rise "$lat" "$lon"
+	fi
+	killall -SIGUSR1 "$TERMINAL"
+	killall -SIGUSR1 "$TERMINAL"
+done
+
+# https://ipinfo.io/developers
+# https://ipgeolocation.com/
+
+# https://wiki.archlinux.org/index.php/GPS
+
+# https://askubuntu.com/questions/894460/automatically-adjust-display-brightness-based-on-sunrise-and-sunset
+# https://github.com/buelowp/sunset
+# https://linuxconfig.org/how-to-obtain-sunrise-sunset-time-for-any-location-from-linux-command-line
+
+# https://github.com/BanchouBoo/suckless/blob/master/st/patches/st-live-reload.diff
+# https://gitlab.com/Tanish2002/st-tanish2002/-/blob/master/patches/stmessage.diff
+# https://gitlab.com/Tanish2002/stmessage-tanish2002
