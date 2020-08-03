@@ -14,25 +14,27 @@ lon=$(curl -s ip-api.com/line/?fields=lon)E
 
 # https://wiki.archlinux.org/index.php/Dark_mode_switching#GTK
 pidof gsd-xsettings &&
-	alias set='gsettings set org.gnome.desktop.interface gtk-theme'
+	alias set_gtk='gsettings set org.gnome.desktop.interface gtk-theme'
 pidof xfsettingsd &&
-	alias set='xfconf-query -c xsettings -p /Net/ThemeName -s'
+	alias set_gtk='xfconf-query -c xsettings -p /Net/ThemeName -s'
 
 # https://unix.stackexchange.com/questions/2931/sunrise-and-other-astronomical-data-from-the-command-line
 # https://github.com/risacher/sunwait
 # https://aur.archlinux.org/packages/sunwait/
-while true; do
+type sunwait && while true; do
 	if sunwait poll "$lat" "$lon" | grep DAY; then
-		set "$gtk"
-		xrdb "$xrdb_light"
-		sunwait wait set "$lat" "$lon"
+		set_gtk "$gtk"
+		xrdb -merge "$xrdb_light"
+		event='set'
 	else
-		set "$gtk_dark"
-		xrdb "$xrdb_dark"
-		sunwait wait rise "$lat" "$lon"
+		set_gtk "$gtk_dark"
+		xrdb -merge "$xrdb_dark"
+		event='rise'
 	fi
 	killall -SIGUSR1 "$TERMINAL"
+	sleep 1
 	killall -SIGUSR1 "$TERMINAL"
+	sunwait wait "$event" "$lat" "$lon"
 done
 
 # https://ipinfo.io/developers
