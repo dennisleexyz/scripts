@@ -2,100 +2,17 @@
 
 # Run this while chrooted into a fresh Arch install.
 
-echo '
-UseSyslog
-Color
-TotalDownload
-VerbosePkgLists
-
-[multilib]
-Include = /etc/pacman.d/mirrorlist
-
-[chaotic-aur]
-Server = http://lonewolf-builder.duckdns.org/$repo/x86_64
-
+grep '^\[instant\]$' /etc/pacman.conf || echo '
 [instant]
 SigLevel = Optional TrustAll
 Server = https://instantos.surge.sh' >> /etc/pacman.conf
 
-# https://lonewolf.pedrohlc.com/chaotic-aur/
-sudo pacman-key --keyserver keys.mozilla.org -r 3056513887B78AEB #8A9E14A07010F7E3
-sudo pacman-key --lsign-key 3056513887B78AEB
-# sudo pacman-key --lsign-key 8A9E14A07010F7E3
-
-pacman -Syu yadm
-
-pacman -S base-devel yay && {
-	gpasswd -a dennis wheel
-	# shellcheck disable=2016
-	printf '\n%%wheel ALL=(ALL) ALL' >> /etc/sudoers
-}
-
-chsh -s /bin/sh dennis
-
-# https://www.thinkwiki.org/wiki/Integrated_Fingerprint_Reader#Models_featuring_this_Technology
-if lsusb | grep -Ey 'upek touch[[:alpha:]]{2,3}ip'; then
-	pacman -S xf86-input-wacom && {
-		# shellcheck disable=2016
-		echo 'export XAUTHORITY="/run/user/1000/gdm/Xauthority"
-export DISPLAY=:0
-case "$4" in
-	00000000)
-		xrandr --output LVDS1 --rotate normal
-		xsetwacom set 17 rotate none
-		xsetwacom set 18 rotate none
-		xsetwacom set 24 rotate none
-		;;
-	00000001)
-		xrandr --output LVDS1 --rotate inverted
-		xsetwacom set 17 rotate half
-		xsetwacom set 18 rotate half
-		xsetwacom set 24 rotate half
-		;;
-esac' > /etc/acpi/actions/tabletmode.sh &&
-		echo 'event=video/tabletmode
-action=/etc/acpi/actions/tabletmode.sh'http://forums.steampowered.com/forums/showthread.php?t=840657
-	}
-
-	pacman -S gdm && systemctl enable -f gdm
-	# pacman -S sddm && systemctl enable -f sddm
-	yay -S xinit-xsession
-
-	# https://wiki.archlinux.org/index.php/Fprint
-	pacman -S fprintd
-	# https://wiki.archlinux.org/index.php/Fprint#Restrict_enrolling
-	echo 'polkit.addRule(function (action, subject) {
-	if (action.id == "net.reactivated.fprint.device.enroll") {
-		return subject.user == "root" ? polkit.Result.YES : polkit.result.NO
-	}
-})' > /usr/share/polkit-1/rules.d/50-net.reactivated.fprint.device.enroll.rules
-
-	# yay -S thinkpad-scripts && {
-	#	udevadm trigger --action=change
-	#	systemctl restart acpid
-	# }
-	
-	pacman -S linux-hardened
-	# pacman -S linux-lts
-	pacman -S linux-firmware
-
-	pacman -S xf86-input-wacom xournalpp
-else
-	pacman -S \
-		sx \
-		linux-zen \
-		linux-zen-headers \
-		lib32-nvidia-390xx-utils \
-
-	yay -S \
-		nvidia-390xx-dkms \
-
-	sed -Ei '
-		s/.*(GRUB_GFXPAYLOAD_LINUX=).*/\11920x1080,keep/;
-	' /etc/default/grub && grub-mkconfig -o /boot/grub/grub.cfg
-fi
-
-echo '
-#GRUB_CMDLINE_LINUX_DEFAULT="quiet cryptdevice=UUID=72fee427-1174-4172-871e-c2ced1daefc2:luks-72fee427-1174-4172-871e-c2ced1daefc2 root=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 resume=/dev/mapper/luks-72fee427-1174-4172-871e-c2ced1daefc2 udev.log_priority=3"
-#GRUB_ENABLE_CRYPTODISK=y
-GRUB_TIMEOUT_STYLE=hidden' >> /etc/default/grub
+pacman -Syu --needed base-devel yay
+sudo sed -i 's/.*\(%wheel ALL=(ALL) ALL\).*/\1/' /etc/sudoers
+read -r user
+useradd -m "$user"
+passwd --status "$user" || passwd "$user"
+gpasswd -a "$user" wheel
+sudo -u "$user" yay -S --needed yadm
+sudo -u "$user" yadm clone https://github.com/dennisleexyz/dotfiles
+sudo -u "$user" yadm bootstrap
