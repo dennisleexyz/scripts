@@ -14,7 +14,9 @@ grep 'user_pref("mail\.' "$1" \
 | grep -v '_folder' \
 | grep -v '\.directory", "' \
 | grep -v '\.description", "' \
+| grep -v 'mail\.root\.' \
 | grep -v '\.[[:alpha:]]*[[:digit:]]", "' \
+| grep -v 'storeContractID' \
 | grep '[[:alpha:]][[:digit:]]' \
 > "$tmp" && mv "$tmp" "$1"
 

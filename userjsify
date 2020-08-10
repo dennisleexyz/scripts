@@ -5,10 +5,11 @@ NAME
 	Thunderbird and Firefox user.js Formatter
 "
 
-[ "$(basename "$1")" = 'user-overrides.js' ] || exit
+basename "$1" | grep '^user.*\.js$' || exit
 
 # shellcheck disable=SC2094
-grep -v 'user_pref("' "$1" | sed '
+grep -v '^[u/]' "$1" | sed '
+	/^$/d;
 	s/^/user_pref("/;
 	s/[;\t]/", /;
 	s/$/);/;
