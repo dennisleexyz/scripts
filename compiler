@@ -1,0 +1,35 @@
+#!/bin/sh
+file=$(readlink -f "${*}")
+dir=${file%/*}
+base="${file%.*}"
+
+cd "$dir" || exit
+
+case "$file" in
+	*\.ms) preconv "$file" | refer -PS -e | groff -me -ms -kept -T pdf > "$base".pdf;;
+	*\.mom) preconv "$file" | refer -PS -e | groff -mom -kept -T pdf > "$base".pdf;;
+	*\.[0-9]) preconv "$file" | refer -PS -e | groff -mandoc -T pdf > "$base".pdf;;
+	*\.[rR]md) Rscript -e "rmarkdown::render('$file', quiet=TRUE)" && if grep pagedown "$file"; then Rscript -e "pagedown::chrome_print('$file')"; fi;;
+	*\.tex) textype "$file";;
+	*\.md)	if grep theme: "$file" >/dev/null; then
+			pandoc "$file" -t beamer --pdf-engine=xelatex -i -o "$base".pdf
+		else
+			if  command -v lowdown >/dev/null; then
+				lowdown -d nointem -e super "$file" -Tms | groff -mpdfmark -ms -kept > "$base".pdf
+			elif command -v groffdown >/dev/null; then
+				groffdown -i "$file" | groff > "$base.pdf"
+			else
+				pandoc "$file" --pdf-engine=context -o "$base".pdf
+			fi
+		fi; ;;
+	*config.h) sudo make install;;
+	*\.c) cc "$file" -o "$base" && "$base";;
+	*\.py) python "$file";;
+	*\.m) octave "$file";;
+	*\.scad) openscad -o "$base".stl "$file";;
+	*\.go) go run "$file";;
+	*\.sent) setsid -f sent "$file" 2>/dev/null;;
+	*/user*\.js) userjsify "$file";;
+	*/prefs\.js) prefsjsclean "$file";;
+	*) sed 1q "$file" | grep "^#!/" | sed "s/^#!//" | xargs -r -I % "$file";;
+esac

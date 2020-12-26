@@ -1,0 +1,10 @@
+#!/bin/sh
+
+YADM_DIR=${YADM_DIR:-${XDG_CONFIG_HOME:-~/.config}/yadm}
+
+IFS='
+'
+for package in $(yay -Qe --color=always); do
+	grep "$(echo "$package" | awk '{print $1}')" "$(find "$YADM_DIR" -iname "$(lsb_release -si)*" -type f)" &&
+		echo "$package"
+done

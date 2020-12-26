@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# https://github.com/RevoLand/Steam-Library-Manager/wiki/FAQ#cant-you-just-cut-and-paste-steam-should-recognize-it
+
+if [ -n "$3" ]; then
+	SRC=$2
+	DEST=$3/steamapps
+elif [ -n "$2" ]; then
+	SRC=${XDG_DATA_HOME:-$HOME/.local/share}/Steam/steamapps
+	DEST=$2/steamapps
+else
+	exit
+fi
+
+if echo "$1" | grep '^[[:digit:]]*$'; then
+	appid=$1
+	installdir=$(grep "installdir" "$SRC/appmanifest_$appid.acf" |
+		sed 's/"//g' | awk -F'\t' '{print $4}')
+else
+	installdir=$1
+	appid=$(basename "$(grep -r "$installdir" "$SRC"/appmanifest_*.acf |
+		awk '{print $1}')" .acf: | grep -o '[[:digit:]]*')
+fi
+
+paths=
+[ -n "$installdir" ] && paths="$paths
+common/$installdir
+"
+[ -n "$appid" ] && paths="$paths
+appmanifest_$appid.acf
+downloading/$appid
+workshop/appworkshop_$appid.acf
+workshop/content/$appid
+"
+
+IFS='
+'
+
+for path in $paths; do
+	mkdir -p "$(dirname "$DEST/$path")"
+	# echo "$SRC"/"$path" "$DEST/$path"
+	mv -Tv "$SRC"/"$path" "$DEST/$path"
+done

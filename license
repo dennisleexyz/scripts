@@ -1,0 +1,4 @@
+#!/bin/sh
+
+curl -Lf https://raw.githubusercontent.com/spdx/license-list-data/master/text/$1.txt ||
+	curl -L https://raw.githubusercontent.com/spdx/license-list-data/master/licenses.md | less

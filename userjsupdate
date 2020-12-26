@@ -1,0 +1,6 @@
+#!/bin/sh
+cd ~/.mozilla/firefox && {
+	curl https://git.savannah.gnu.org/cgit/gnuzilla.git/plain/data/vendor.js |
+	sed 's/^p/user_&/' > user.js
+	cat user-overrides.js >> user.js
+}

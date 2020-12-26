@@ -1,0 +1,7 @@
+#!/bin/sh
+
+IFS='
+'
+for line in $(xsetwacom list | awk -F'[[:space:]]*id' '{print $1}'); do
+	xsetwacom set "$line" MapToOutput LVDS1
+done

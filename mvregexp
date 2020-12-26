@@ -1,0 +1,9 @@
+#!/bin/sh
+for f in $(grep -rI "$1" | sed "s/:.*//" | sed "s/\/.*$//"); do
+	if [ ! -d "$2/$f" ]; then
+		mkdir "$2/$f"
+	fi
+done
+for f in $(grep -rI "$1" | sed "s/:.*//"); do
+	mv "$f" "$2"
+done

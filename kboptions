@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ -n "$1" ]; then
+	grep "$1" --color=always /usr/share/X11/xkb/rules/base.lst |
+		${PAGER:-less} -R
+else
+	${PAGER:-less} /usr/share/X11/xkb/rules/base.lst 
+fi

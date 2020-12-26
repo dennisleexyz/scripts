@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# https://k3a.me/boot-windows-partition-virtually-kvm-uefi/
+
+dev=sda
+
+pgrep qemu-system-x86 && exit
+
+killall steam
+
+mounts=$(lsblk /dev/$dev -o FSTYPE,MOUNTPOINT | grep -E '(vfat|ntfs)' | awk '{print $2}')
+
+#shellcheck disable=2013
+for part in $mounts; do
+	umount "$part" || sudo -A umount "$part"
+done
+
+[ -z "$mounts" ] && {
+	sudo -A qemu-system-x86_64 \
+		-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
+		-m 4096 -smp 2,sockets=1,cores=2 \
+		-enable-kvm \
+		-drive file=/usr/share/ovmf/x64/OVMF_CODE.fd,if=pflash,format=raw,unit=0,readonly \
+		-drive file=/dev/$dev,driver=raw \
+
+}

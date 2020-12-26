@@ -32,7 +32,7 @@ type sunwait && while true; do
 		event='rise'
 	fi
 	killall -SIGUSR1 "$TERMINAL"
-	sleep 1
+	sleep 2
 	killall -SIGUSR1 "$TERMINAL"
 	sunwait wait "$event" "$lat" "$lon"
 done

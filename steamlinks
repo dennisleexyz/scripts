@@ -1,0 +1,19 @@
+#!/bin/ksh
+
+ln='ln -sr'
+
+cd "${1:-~/.local/share/Steam}" && {
+	age3='steamapps/compatdata/105450/pfx/drive_c/users/steamuser/My Documents'
+	mkdir -p "$age3" && ln Games "$age3/My Games"
+
+	age2hd=steamapps/common/Age2HD
+	mkdir -p $age2hd &&
+		$ln -t $age2hd Games/Age2HD/{Logs,mods,Profiles,SaveGame}
+	mkdir -p $age2hd/resources/_common &&
+		$ln -t $age2hd/resources/_common Games/Age2HD/resources/_common/{campaign,random-map-scripts,scenario}
+
+	aoe2de=steamapps/compatdata/813780/pfx/drive_c/users/steamuser
+	mkdir -p $aoe2de && ln Games $aoe2de
+
+	$ln -t steamapps Games/workshop
+}

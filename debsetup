@@ -60,6 +60,8 @@ apt install dpkg-dev linux-headers-"$(uname -r)" linux-image-amd64
 apt install zfs-dkms zfsutils-linux
 apt install zfs-auto-snapshot # Automatically installs cron jobs, so just werks.
 # apt install zfsnap # Another similar utility.
+dkms autoinstall
+modprobe zfs
 
 # Install other packages (in approximate descending order of importance).
 apt install -y \

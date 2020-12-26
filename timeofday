@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# https://ip-api.com/docs
+loc=$(curl -s ip-api.com/line/?fields=lat,lon)
+lat=$(echo "$loc" | sed 1q)N
+lon=$(echo "$loc" | sed 1d)E
+
+# https://unix.stackexchange.com/questions/2931/sunrise-and-other-astronomical-data-from-the-command-line
+# https://github.com/risacher/sunwait
+# https://aur.archlinux.org/packages/sunwait/
+sunwait poll "$lat" "$lon"
+
+# https://ipinfo.io/developers
+# https://ipgeolocation.com/
+
+# https://wiki.archlinux.org/index.php/GPS
+
+# https://askubuntu.com/questions/894460/automatically-adjust-display-brightness-based-on-sunrise-and-sunset
+# https://github.com/buelowp/sunset
+# https://linuxconfig.org/how-to-obtain-sunrise-sunset-time-for-any-location-from-linux-command-line

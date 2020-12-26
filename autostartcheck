@@ -1,0 +1,5 @@
+#!/bin/sh
+
+for p in $(dex -ad | awk '{print $3}') $(awk '{print $1}' ~/.xprofile | grep -v '#'); do
+	echo "$(basename "$p")" "$(pgrep "$(basename "$p")")"
+done

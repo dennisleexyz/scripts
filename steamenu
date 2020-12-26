@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for f in "${XDG_DATA_HOME:-$HOME/.local/share}"/Steam/steamapps/appmanifest_*.acf; do
+	appid="$appid $(grep '"appid"' "$f" | awk -F'\t\t' '{print $2}' | sed 's/"//g')"
+	name="$name"$'\n'"$(grep '"name"' "$f" | awk -F'\t\t' '{print $2}' | sed 's/"//g')"
+done
+
+appid=$(grep -v
+# steam -silent -no-browser

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -f ~/.config/"$1" ]; then
+	${VISUAL:-$EDITOR} ~/.config/"$1"
+	exit
+fi
+
+d=$(find ~/.config -maxdepth 1 -type d -name "$1")
+f=$(find "$d" -maxdepth 1 -type f)
+if [ "$(echo "$f" | wc -l)" = 1 ]; then
+	${VISUAL:-$EDITOR} "$f"
+else
+	${VISUAL:-$EDITOR} "$d"
+fi

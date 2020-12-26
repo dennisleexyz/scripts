@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ "$1" = -t ]; then
+	type pacgraph || sudo pacman -S pacgraph
+
+	totalsize(){ pacgraph --mode arch-repo -c "$1" | grep 'Total size: '; }
+
+	if [ -n "$2" ]; then
+		for argument in "$@"; do
+			totalsize "$argument" | sed "s/Total size:/$argument/"
+		done
+	else
+		totalsize "$1"
+	fi
+fi

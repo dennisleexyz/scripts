@@ -1,0 +1,6 @@
+#!/bin/sh
+
+	#grep -rI --color '\.\.\.'
+	#grep -rI --color '^```' \
+find "${1:-.}/*" -exec \
+{} +;

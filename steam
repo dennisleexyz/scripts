@@ -1,0 +1,5 @@
+#!/bin/sh
+
+pgrep qemu-system-x86 && exit
+
+steam -silent "$@"
